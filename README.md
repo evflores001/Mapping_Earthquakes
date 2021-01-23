@@ -1,1 +1,2 @@
 # Mapping_Earthquakes
+The purpose of this challenge was to use Leaflet, JavaScript, HTML, and D3 to add visual information to an earthquake map created during the module. Some features added onto the map were adding a tectonic plate layer to demonstrate where the various tectonic plate lie on the map. Another layer added was the dark themed map overlay. All of these layers can be toggled on or off. 
