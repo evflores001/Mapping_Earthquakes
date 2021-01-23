@@ -8,7 +8,7 @@ __pycache__/
 
 
 # Adding API key
-static/js/config.js/
+/static/js/config.js
 
 # Distribution / packaging
 .Python
