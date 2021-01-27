@@ -22,6 +22,7 @@ let dark = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{
 	accessToken: API_KEY
 });
 
+
 // Create the map object with center, zoom level and default layer.
 let map = L.map('mapid', {
 	center: [40.7, -94.5],
@@ -33,19 +34,19 @@ let map = L.map('mapid', {
 let baseMaps = {
   "Streets": streets,
   "Satellite": satelliteStreets,
-  "Dark": dark
+  "Dark": dark,
 };
 
 // 1. Add a 2nd layer group for the tectonic plate data.
 let allEarthquakes = new L.LayerGroup();
-let allTectonics = new L.LayerGroup();
-let majorEQ = new L.LayerGroup();
+let tectPlates = new L.LayerGroup();
+let majorEarth= new L.LayerGroup();
 
 // 2. Add a reference to the tectonic plates group to the overlays object.
 let overlays = {
   "Earthquakes": allEarthquakes,
-  "Tectonic Plates": allTectonics,
-  "Major Earthquakes": majorEQ
+  "Tectonic Plates": tectPlates,
+  "Major Earthquakes": majorEarth
 };
 
 // Then we add a control to the map that will allow the user to change which
@@ -62,7 +63,7 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
     return {
       opacity: 1,
       fillOpacity: 1,
-      fillColor: getColor(feature.properties.mag),
+      fillColor: magColor(feature.properties.mag),
       color: "#000000",
       radius: getRadius(feature.properties.mag),
       stroke: true,
@@ -71,7 +72,7 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
   }
 
   // This function determines the color of the marker based on the magnitude of the earthquake.
-  function getColor(magnitude) {
+  function magColor(magnitude) {
     if (magnitude > 5) {
       return "#ea2c2c";
     }
@@ -152,23 +153,21 @@ legend.onAdd = function() {
 
 
 // Add Color & Weight to Tectonic Plate geoJson data
-function tecStyle(feature) {
-  return{
+let tectStyle = {
     color: "#ff1a75",
     weight: 1.3
-  }
-}
+    }
 
   // 3. Use d3.json to make a call to get our Tectonic Plate geoJSON data.
   d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json").then(function(data) {
     L.geoJson(data, {
-      style: tecStyle
-    }).addTo(allTectonics);
+      style: tectStyle
+    }).addTo(tectPlates);
   });
 });
 
   // Then we add the tectonics layer to our map.
-  allTectonics.addTo(map);
+  tectPlates.addTo(map);
 
 
 // 4. Use the same style as the earthquake data.
@@ -177,11 +176,11 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geoj
   // This function returns the style data for each of the earthquakes we plot on
   // the map. We pass the magnitude of the earthquake into two separate functions
   // to calculate the color and radius.
-  function styleMajor(feature) {
+  function styleInfo(feature) {
     return {
       opacity: 1,
       fillOpacity: 1,
-      fillColor: getMajorColor(feature.properties.mag),
+      fillColor: magColor(feature.properties.mag),
       color: "#000000",
       radius: getRadius(feature.properties.mag),
       stroke: true,
@@ -190,16 +189,20 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geoj
   }
 
   // This function determines the color of the marker based on the magnitude of the earthquake.
-  function getMajorColor(magnitude) {
+  function magColor(magnitude) {
     if (magnitude > 5) {
       return "#ea2c2c";
     }
     if (magnitude > 4) {
       return "#ea822c";
     }
-    if (magnitude < 4) {
-      return "#ee9c00";
+    if (magnitude > 3) {
+      return "#eecc00";
     }
+    if (magnitude < 2) {
+      return "d4ee00"
+    }
+    return "d4ee00"
   }
 
   // This function determines the radius of the earthquake marker based on its magnitude.
@@ -219,7 +222,7 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geoj
       		return L.circleMarker(latlng);
         },
       // We set the style for each circleMarker using our styleInfo function.
-    style: styleMajor,
+    style: styleInfo,
      // We create a popup for each circleMarker to display the magnitude and location of the earthquake
      //  after the marker has been created and styled.
      onEachFeature: function(feature, layer) {
